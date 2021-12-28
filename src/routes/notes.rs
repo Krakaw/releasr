@@ -25,12 +25,28 @@ pub async fn new_note(
     app_data: web::Data<AppData>,
     new_note: web::Json<NewNote>,
 ) -> Result<HttpResponse, Error> {
-    eprintln!("new_note = {:?}", new_note);
     let conn = app_data.conn.lock().unwrap();
-    let note = new_note.into_inner().save(&conn).await.map_err(|e| {
+    let note = new_note
+        .into_inner()
+        .save(&conn)
+        .await
+        .map_err(|e| HttpResponse::InternalServerError())?;
+
+    Ok(HttpResponse::Ok().json(note))
+}
+
+pub async fn complete_note(
+    app_data: web::Data<AppData>,
+    note_id: web::Path<i64>,
+) -> Result<HttpResponse, Error> {
+    let conn = app_data.conn.lock().unwrap();
+    let note = Note::get(note_id.into_inner(), &conn).await.map_err(|e| {
         eprintln!("e = {:?}", e);
         HttpResponse::InternalServerError()
     })?;
-
+    let note = note.complete(&conn).await.map_err(|e| {
+        eprintln!("e = {:?}", e);
+        HttpResponse::InternalServerError()
+    })?;
     Ok(HttpResponse::Ok().json(note))
 }

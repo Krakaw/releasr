@@ -4,7 +4,7 @@ mod routes;
 
 use crate::errors::ReleasrError;
 use crate::models::get_connection;
-use crate::routes::notes::{get_notes, new_note};
+use crate::routes::notes::{complete_note, get_notes, new_note};
 use actix_web::{web, App, HttpServer};
 use std::sync::Mutex;
 
@@ -20,11 +20,14 @@ async fn main() -> std::io::Result<()> {
         let app_data = web::Data::new(AppData {
             conn: Mutex::new(conn),
         });
-        App::new().app_data(app_data).service(
-            web::resource("/notes")
-                .route(web::get().to(get_notes))
-                .route(web::post().to(new_note)),
-        )
+        App::new()
+            .app_data(app_data)
+            .service(
+                web::resource("/notes")
+                    .route(web::get().to(get_notes))
+                    .route(web::post().to(new_note)),
+            )
+            .service(web::resource("/notes/{id}").route(web::patch().to(complete_note)))
     })
     .bind("127.0.0.1:8080")?
     .run()
