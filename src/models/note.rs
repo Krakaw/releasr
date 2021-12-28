@@ -2,8 +2,9 @@ use crate::models::custom_version::CustomVersion;
 
 use crate::ReleasrError;
 use chrono::{DateTime, Utc};
-use rusqlite::{Connection, Row};
+use rusqlite::{params, Connection, Row};
 
+use crate::routes::notes::FindQuery;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
@@ -18,7 +19,7 @@ pub struct NewNote {
 pub struct Note {
     id: i64,
     version: CustomVersion,
-    version_int: f64,
+    version_int: i64,
     note: String,
     environment_name: String,
     completed_at: Option<DateTime<Utc>>,
@@ -30,7 +31,7 @@ pub struct Note {
 impl NewNote {
     pub async fn save(self, conn: &Connection) -> Result<Note, ReleasrError> {
         let now = Utc::now().to_rfc3339();
-        let version_int: f64 = self.version.clone().into();
+        let version_int: i64 = self.version.clone().into();
         let sql = r#"
             INSERT INTO notes
                 (version, version_int, note, environment_name, created_at, modified_at)
@@ -61,19 +62,20 @@ impl Note {
         Ok(res)
     }
 
-    // pub async fn find(
-    //     environment: String,
-    //     version: CustomVersion,
-    //     conn: &Connection,
-    // ) -> Result<Vec<Note>, ReleasrError> {
-    //     // let sql = "SELECT id, version, note,environment_name, completed_at, created_at, modified_at, deleted_at FROM notes WHERE "
-    // }
-
-    pub async fn list(conn: &Connection) -> Result<Vec<Note>, ReleasrError> {
-        let sql = "SELECT id, version, version_int, note,environment_name, completed_at, created_at, modified_at, deleted_at FROM notes;";
+    pub async fn find(find_query: FindQuery, conn: &Connection) -> Result<Vec<Note>, ReleasrError> {
+        let sql = "SELECT id, version, version_int, note,environment_name, completed_at, created_at, modified_at, deleted_at FROM notes WHERE (?1 IS NULL OR environment_name = ?1) AND (?2 IS NULL OR version_int <= ?2);";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt
-            .query_map([], |row| Note::try_from(row))?
+            .query_map(
+                params![
+                    find_query.environment,
+                    find_query.version.map(|v| {
+                        let v: i64 = v.into();
+                        v
+                    }),
+                ],
+                |row| Note::try_from(row),
+            )?
             .map(Result::unwrap)
             .collect();
         Ok(res)
@@ -86,19 +88,16 @@ impl<'stmt> TryFrom<&Row<'stmt>> for Note {
     fn try_from(row: &Row) -> Result<Self, Self::Error> {
         let version: String = row.get(1).unwrap();
         let custom_version = CustomVersion::parse(&version).unwrap();
-        let version = custom_version.clone().0;
-        let version_int =
-            (version.major.pow(9) + version.minor.pow(6) + version.patch.pow(3)) as f64;
         Ok(Note {
             id: row.get(0).unwrap(),
             version: custom_version,
-            version_int,
-            note: row.get(2).unwrap(),
-            environment_name: row.get(3).unwrap(),
-            completed_at: row.get(4).unwrap(),
-            created_at: row.get(5).unwrap(),
-            modified_at: row.get(6).unwrap(),
-            deleted_at: row.get(7).unwrap(),
+            version_int: row.get(2).unwrap(),
+            note: row.get(3).unwrap(),
+            environment_name: row.get(4).unwrap(),
+            completed_at: row.get(5).unwrap(),
+            created_at: row.get(6).unwrap(),
+            modified_at: row.get(7).unwrap(),
+            deleted_at: row.get(8).unwrap(),
         })
     }
 }

@@ -19,10 +19,9 @@ impl Display for CustomVersion {
     }
 }
 
-impl From<CustomVersion> for f64 {
+impl From<CustomVersion> for i64 {
     fn from(custom_version: CustomVersion) -> Self {
         let version = custom_version.0;
-
-        (version.major.pow(9) + version.minor.pow(6) + version.patch.pow(3)) as f64
+        (version.major.pow(9) + version.minor.pow(6) + version.patch.pow(3)) as i64
     }
 }

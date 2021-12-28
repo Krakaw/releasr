@@ -1,10 +1,21 @@
+use crate::models::custom_version::CustomVersion;
 use crate::models::note::{NewNote, Note};
-use crate::{AppData};
+use crate::AppData;
 use actix_web::{web, Error, HttpResponse, Result};
-
-pub async fn get_notes(app_data: web::Data<AppData>) -> Result<HttpResponse, Error> {
+use serde::{Deserialize, Serialize};
+#[derive(Deserialize, Serialize, Debug)]
+pub struct FindQuery {
+    pub environment: Option<String>,
+    pub version: Option<CustomVersion>,
+    pub show_completed: Option<bool>,
+}
+pub async fn get_notes(
+    app_data: web::Data<AppData>,
+    query: web::Query<FindQuery>,
+) -> Result<HttpResponse, Error> {
     let conn = app_data.conn.lock().unwrap();
-    let notes = Note::list(&conn)
+
+    let notes = Note::find(query.0, &conn)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?;
     Ok(HttpResponse::Ok().json(notes))
