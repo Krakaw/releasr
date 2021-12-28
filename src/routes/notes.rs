@@ -1,5 +1,5 @@
 use crate::models::note::{NewNote, Note};
-use crate::{AppData, ReleasrError};
+use crate::{AppData};
 use actix_web::{web, Error, HttpResponse, Result};
 
 pub async fn get_notes(app_data: web::Data<AppData>) -> Result<HttpResponse, Error> {

@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
         let app_data = web::Data::new(AppData {
             conn: Mutex::new(conn),
         });
-        App::new().app_data(app_data.clone()).service(
+        App::new().app_data(app_data).service(
             web::resource("/notes")
                 .route(web::get().to(get_notes))
                 .route(web::post().to(new_note)),

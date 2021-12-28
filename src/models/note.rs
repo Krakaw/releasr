@@ -1,9 +1,9 @@
 use crate::models::custom_version::CustomVersion;
-use crate::models::environment::Environment;
+
 use crate::ReleasrError;
 use chrono::{DateTime, Utc};
-use rusqlite::{types::FromSql, Connection, Row, ToSql};
-use semver::Version;
+use rusqlite::{Connection, Row};
+
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
