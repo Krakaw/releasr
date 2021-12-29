@@ -1,7 +1,7 @@
 use crate::errors::ReleasrError;
 use crate::routes::environments::FindQuery;
-use rusqlite::Connection;
 use rusqlite::{params, Row};
+use rusqlite::{Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
@@ -35,7 +35,13 @@ impl Environment {
     pub async fn get(name: String, conn: &Connection) -> Result<Environment, ReleasrError> {
         let sql = "SELECT * FROM environments WHERE name = ?1";
         let mut stmt = conn.prepare(sql)?;
-        let environment = stmt.query_row(params![name], |row| Environment::try_from(row))?;
+        let environment = stmt
+            .query_row(params![name], |row| Environment::try_from(row))
+            .optional()?
+            .ok_or(ReleasrError::NotFound(format!(
+                "Environment: {} not found",
+                name
+            )))?;
         Ok(environment)
     }
 
@@ -58,8 +64,8 @@ impl<'stmt> TryFrom<&Row<'stmt>> for Environment {
 
     fn try_from(row: &Row<'stmt>) -> Result<Self, Self::Error> {
         Ok(Environment {
-            name: row.get(0).unwrap(),
-            version_url: row.get(1).unwrap(),
+            name: row.get(0)?,
+            version_url: row.get(1)?,
         })
     }
 }

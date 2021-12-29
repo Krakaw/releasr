@@ -1,5 +1,6 @@
 use crate::errors::ReleasrError;
 use crate::models::custom_version::CustomVersion;
+use crate::models::environment::Environment;
 use crate::models::note::{NewNote, Note};
 use crate::AppData;
 use actix_web::{web, HttpResponse, Result};
@@ -26,7 +27,11 @@ pub async fn new_note(
     new_note: web::Json<NewNote>,
 ) -> Result<HttpResponse, ReleasrError> {
     let conn = app_data.conn.lock().unwrap();
-    let note = new_note.into_inner().save(&conn).await?;
+    let new_note = new_note.into_inner();
+    let name = new_note.environment_name.clone();
+    // Check it's a valid environment
+    Environment::get(name, &conn).await?;
+    let note = new_note.save(&conn).await?;
 
     Ok(HttpResponse::Ok().json(note))
 }

@@ -10,9 +10,9 @@ use std::convert::TryFrom;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct NewNote {
-    version: CustomVersion,
-    note: String,
-    environment_name: String,
+    pub version: CustomVersion,
+    pub note: String,
+    pub environment_name: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -25,7 +25,6 @@ pub struct Note {
     completed_at: Option<DateTime<Utc>>,
     created_at: DateTime<Utc>,
     modified_at: DateTime<Utc>,
-    deleted_at: Option<DateTime<Utc>>,
 }
 
 impl NewNote {
@@ -109,7 +108,6 @@ impl<'stmt> TryFrom<&Row<'stmt>> for Note {
             completed_at: row.get(5).unwrap(),
             created_at: row.get(6).unwrap(),
             modified_at: row.get(7).unwrap(),
-            deleted_at: row.get(8).unwrap(),
         })
     }
 }

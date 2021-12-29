@@ -1,7 +1,7 @@
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 
-use serde::{Serialize};
+use serde::Serialize;
 
 use std::net::AddrParseError;
 use thiserror::Error;
@@ -17,8 +17,8 @@ pub enum ReleasrError {
     AddrParseError(#[from] AddrParseError),
     #[error(transparent)]
     Other(#[from] anyhow::Error),
-    #[error("NotFound error")]
-    NotFound,
+    #[error("NotFound error: {0}")]
+    NotFound(String),
     #[error("Forbidden error")]
     Forbidden,
     #[error("Unknown error")]
@@ -35,7 +35,7 @@ struct ErrorResponse {
 impl ResponseError for ReleasrError {
     fn status_code(&self) -> StatusCode {
         match *self {
-            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::Unknown => StatusCode::INTERNAL_SERVER_ERROR,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
