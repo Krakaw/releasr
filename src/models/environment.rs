@@ -8,25 +8,31 @@ use std::convert::TryFrom;
 #[derive(Deserialize, Debug, Serialize)]
 pub struct NewEnvironment {
     pub name: String,
-    pub version_url: Option<String>,
+    pub version_url: String,
+    pub last_deployed_version: Option<i64>,
 }
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Environment {
     pub name: String,
-    pub version_url: Option<String>,
+    pub version_url: String,
+    pub last_deployed_version: i64,
 }
 
 impl NewEnvironment {
     pub async fn save(&self, conn: &Connection) -> Result<Environment, ReleasrError> {
         let name = self.name.clone();
         let sql = r#"
-            INSERT INTO environments (name, version_url)
-            VALUES (?1, ?2)
+            INSERT INTO environments (name, version_url, last_deployed_version)
+            VALUES (?1, ?2, ?3)
             ON CONFLICT (name) DO UPDATE SET
-                version_url = COALESCE(excluded.version_url, version_url);
+                version_url = COALESCE(excluded.version_url, version_url),
+                last_deployed_version = COALESCE(excluded.last_deployed_version, last_deployed_version);
         "#;
-        conn.execute(sql, params![name, self.version_url])?;
+        conn.execute(
+            sql,
+            params![name, self.version_url, self.last_deployed_version],
+        )?;
         Environment::get(name, conn).await
     }
 }
@@ -72,6 +78,7 @@ impl<'stmt> TryFrom<&Row<'stmt>> for Environment {
         Ok(Environment {
             name: row.get(0)?,
             version_url: row.get(1)?,
+            last_deployed_version: row.get(2)?,
         })
     }
 }

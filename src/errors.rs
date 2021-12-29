@@ -15,6 +15,8 @@ pub enum ReleasrError {
     ActixError(#[from] actix_web::Error),
     #[error("Address error")]
     AddrParseError(#[from] AddrParseError),
+    #[error("Historic version provided last deployed: {0} provided: {1}")]
+    HistoricVersionError(i64, i64),
     #[error(transparent)]
     Other(#[from] anyhow::Error),
     #[error("NotFound error: {0}")]

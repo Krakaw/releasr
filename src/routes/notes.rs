@@ -24,7 +24,6 @@ pub async fn get_notes(
     query: web::Query<FindQuery>,
 ) -> Result<HttpResponse, ReleasrError> {
     let conn = app_data.conn.lock().unwrap();
-
     let notes = Note::find(query.0, &conn).await?;
     Ok(HttpResponse::Ok().json(notes))
 }
@@ -35,10 +34,16 @@ pub async fn new_note(
 ) -> Result<HttpResponse, ReleasrError> {
     let conn = app_data.conn.lock().unwrap();
     let new_note = new_note.into_inner();
+    let version = i64::from(new_note.version.clone());
     let name = new_note.environment_name.clone();
     // Check it's a valid environment
     let environment = Environment::get(name, &conn).await?;
-
+    if environment.last_deployed_version > version {
+        return Err(ReleasrError::HistoricVersionError(
+            environment.last_deployed_version,
+            version,
+        ));
+    }
     let note = new_note.save(&conn).await?;
     Ok(HttpResponse::Ok().json(note))
 }
@@ -58,7 +63,6 @@ pub async fn complete_note(
     filter: web::Json<CompleteQuery>,
 ) -> Result<HttpResponse, ReleasrError> {
     let conn = app_data.conn.lock().unwrap();
-
     let filter = filter.into_inner();
     let version = filter.version.clone();
     let environment = Environment::get(filter.environment.clone(), &conn).await?;
