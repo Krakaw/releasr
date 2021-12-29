@@ -1,8 +1,8 @@
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
-use rusqlite::Error;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+
+use serde::{Serialize};
+
 use std::net::AddrParseError;
 use thiserror::Error;
 #[derive(Error, Debug)]

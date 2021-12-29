@@ -2,7 +2,6 @@ use crate::errors::ReleasrError;
 use dotenv::dotenv;
 use std::env;
 use std::net::SocketAddr;
-use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct Config {
@@ -15,9 +14,9 @@ impl Config {
         dotenv().ok();
         let config = Config {
             listen: env::var("LISTEN")
-                .unwrap_or("0.0.0.0:8080".to_string())
+                .unwrap_or_else(|| "0.0.0.0:8080".to_string())
                 .parse()?,
-            db_path: env::var("DB_PATH").unwrap_or("./db.sqlite".to_string()),
+            db_path: env::var("DB_PATH").unwrap_or_else(|| "./db.sqlite".to_string()),
         };
         Ok(config)
     }

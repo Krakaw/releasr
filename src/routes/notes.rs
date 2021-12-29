@@ -2,7 +2,7 @@ use crate::errors::ReleasrError;
 use crate::models::custom_version::CustomVersion;
 use crate::models::note::{NewNote, Note};
 use crate::AppData;
-use actix_web::{web, Error, HttpResponse, Result};
+use actix_web::{web, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
