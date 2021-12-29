@@ -56,14 +56,14 @@ impl NewNote {
 
 impl Note {
     pub async fn get(id: i64, conn: &Connection) -> Result<Note, ReleasrError> {
-        let sql = "SELECT id, version, version_int, note,environment_name, completed_at, created_at, modified_at, deleted_at FROM notes WHERE id = ?1;";
+        let sql = "SELECT *  FROM notes WHERE id = ?1;";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt.query_row(&[&id], |row| Note::try_from(row))?;
         Ok(res)
     }
 
     pub async fn find(find_query: FindQuery, conn: &Connection) -> Result<Vec<Note>, ReleasrError> {
-        let sql = "SELECT id, version, version_int, note,environment_name, completed_at, created_at, modified_at, deleted_at FROM notes WHERE (?1 IS NULL OR environment_name = ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
+        let sql = "SELECT * FROM notes WHERE (?1 IS NULL OR environment_name = ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt
             .query_map(
@@ -82,6 +82,11 @@ impl Note {
         Ok(res)
     }
 
+    pub async fn destroy(self, conn: &Connection) -> Result<Self, ReleasrError> {
+        let sql = "DELETE FROM notes WHERE id = ?1;";
+        conn.execute(sql, &[&self.id.to_string()])?;
+        Ok(self)
+    }
     pub async fn complete(self, conn: &Connection) -> Result<Self, ReleasrError> {
         let sql = "UPDATE notes SET completed_at = ?1 WHERE id = ?2;";
         conn.execute(sql, &[&Utc::now().to_rfc3339(), &self.id.to_string()])?;
