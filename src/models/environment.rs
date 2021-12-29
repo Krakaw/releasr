@@ -57,6 +57,12 @@ impl Environment {
             .collect();
         Ok(res)
     }
+
+    pub async fn set_version(&self, version: i64, conn: &Connection) -> Result<Self, ReleasrError> {
+        let sql = "UPDATE environments SET last_deployed_version = ?1 WHERE name = ?2";
+        conn.execute(sql, params![version, self.name])?;
+        Environment::get(self.name.clone(), conn).await
+    }
 }
 
 impl<'stmt> TryFrom<&Row<'stmt>> for Environment {

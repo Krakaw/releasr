@@ -5,12 +5,19 @@ use crate::models::note::{NewNote, Note};
 use crate::AppData;
 use actix_web::{web, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct FindQuery {
     pub environment: Option<String>,
     pub version: Option<CustomVersion>,
     pub show_completed: Option<bool>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CompleteQuery {
+    pub environment: String,
+    pub version: CustomVersion,
 }
 pub async fn get_notes(
     app_data: web::Data<AppData>,
@@ -30,9 +37,9 @@ pub async fn new_note(
     let new_note = new_note.into_inner();
     let name = new_note.environment_name.clone();
     // Check it's a valid environment
-    Environment::get(name, &conn).await?;
-    let note = new_note.save(&conn).await?;
+    let environment = Environment::get(name, &conn).await?;
 
+    let note = new_note.save(&conn).await?;
     Ok(HttpResponse::Ok().json(note))
 }
 
@@ -48,10 +55,15 @@ pub async fn delete_note(
 
 pub async fn complete_note(
     app_data: web::Data<AppData>,
-    note_id: web::Path<i64>,
+    filter: web::Json<CompleteQuery>,
 ) -> Result<HttpResponse, ReleasrError> {
     let conn = app_data.conn.lock().unwrap();
-    let note = Note::get(note_id.into_inner(), &conn).await?;
-    let note = note.complete(&conn).await?;
-    Ok(HttpResponse::Ok().json(note))
+
+    let filter = filter.into_inner();
+    let version = filter.version.clone();
+    let environment = Environment::get(filter.environment.clone(), &conn).await?;
+    let completed_count = Note::complete_filter(filter, &conn).await?;
+    let environment = environment.set_version(version.into(), &conn).await?;
+    Ok(HttpResponse::Ok()
+        .json(json!({"environment": environment, "completed_count": completed_count})))
 }

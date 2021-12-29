@@ -4,7 +4,7 @@ use crate::ReleasrError;
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection, Row};
 
-use crate::routes::notes::FindQuery;
+use crate::routes::notes::{CompleteQuery, FindQuery};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
@@ -86,6 +86,25 @@ impl Note {
         conn.execute(sql, &[&self.id.to_string()])?;
         Ok(self)
     }
+
+    pub async fn complete_filter(
+        filter: CompleteQuery,
+        conn: &Connection,
+    ) -> Result<usize, ReleasrError> {
+        let sql = "UPDATE notes SET completed_at = ?1 WHERE environment_name = ?2 AND version_int <= ?3 AND completed_at IS NULL;";
+        let environment_name = filter.environment;
+        let version_int = i64::from(filter.version);
+        let res = conn.execute(
+            sql,
+            params![
+                &Utc::now().to_rfc3339(),
+                &environment_name,
+                &version_int.to_string()
+            ],
+        )?;
+        Ok(res)
+    }
+
     pub async fn complete(self, conn: &Connection) -> Result<Self, ReleasrError> {
         let sql = "UPDATE notes SET completed_at = ?1 WHERE id = ?2;";
         conn.execute(sql, &[&Utc::now().to_rfc3339(), &self.id.to_string()])?;

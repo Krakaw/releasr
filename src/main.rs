@@ -38,13 +38,10 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::resource("/notes")
                     .route(web::get().to(get_notes))
-                    .route(web::post().to(new_note)),
+                    .route(web::post().to(new_note))
+                    .route(web::patch().to(complete_note)),
             )
-            .service(
-                web::resource("/notes/{id}")
-                    .route(web::patch().to(complete_note))
-                    .route(web::delete().to(delete_note)),
-            )
+            .service(web::resource("/notes/{id}").route(web::delete().to(delete_note)))
     })
     .bind(listen)?
     .run()
