@@ -6,7 +6,7 @@ mod routes;
 use crate::config::Config;
 use crate::errors::ReleasrError;
 use crate::models::get_connection;
-use crate::routes::environments::get_environments;
+use crate::routes::environments::{get_environments, new_environment};
 use crate::routes::notes::{complete_note, delete_note, get_notes, new_note};
 use actix_web::{web, App, HttpServer};
 use std::sync::Mutex;
@@ -30,7 +30,11 @@ async fn main() -> std::io::Result<()> {
         });
         App::new()
             .app_data(app_data)
-            .service(web::resource("/environments").route(web::get().to(get_environments)))
+            .service(
+                web::resource("/environments")
+                    .route(web::post().to(new_environment))
+                    .route(web::get().to(get_environments)),
+            )
             .service(
                 web::resource("/notes")
                     .route(web::get().to(get_notes))
