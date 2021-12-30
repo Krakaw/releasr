@@ -1,7 +1,7 @@
 <h1 align="center">Welcome to releasr 👋</h1>
 <p>
-  <a href="https://twitter.com/krakaw\_1" target="_blank">
-    <img alt="Twitter: krakaw\_1" src="https://img.shields.io/twitter/follow/krakaw\_1.svg?style=social" />
+  <a href="https://twitter.com/krakaw_1" target="_blank">
+    <img alt="Twitter: krakaw_1" src="https://img.shields.io/twitter/follow/krakaw_1.svg?style=social" />
   </a>
 </p>
 
