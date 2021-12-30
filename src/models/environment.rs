@@ -5,7 +5,7 @@ use rusqlite::{Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Deserialize, Debug, Serialize, Default)]
 pub struct NewEnvironment {
     pub name: String,
     pub version_url: String,
@@ -31,7 +31,11 @@ impl NewEnvironment {
         "#;
         conn.execute(
             sql,
-            params![name, self.version_url, self.last_deployed_version],
+            params![
+                name,
+                self.version_url,
+                self.last_deployed_version.unwrap_or_default()
+            ],
         )?;
         Environment::get(name, conn).await
     }

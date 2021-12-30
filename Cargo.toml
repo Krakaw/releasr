@@ -2,7 +2,7 @@
 name = "releasr"
 version = "0.1.0"
 edition = "2018"
-authors = ["Krakaw"]
+authors = ["Krakaw <41575888+Krakaw@users.noreply.github.com>"]
 
 
 [dependencies]
