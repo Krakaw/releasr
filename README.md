@@ -5,12 +5,16 @@
   </a>
 </p>
 
-> Release not tracking on a per environment per semver release.
+> Release note tracking on a per environment per semver release.
+> 
+> Ever delay a release and then forget the steps you need to run when it eventually does go out. 
+> Releasr is made for just those times. Attach version specific release notes and retrieve them when the deployment
+> is ready to go out.
 > 
 > Every release note is attached to an environment. 
 > Once a note has been completed it won't be shown again. 
 > 
-> Notes cannot be added to a version that has been completed.  
+> Notes cannot be added to a version that has been completed already.
 
 ## Install
 
