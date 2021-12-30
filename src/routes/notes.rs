@@ -54,6 +54,7 @@ pub async fn new_note(
     for environment in environments.clone() {
         if environment.last_deployed_version > version {
             return Err(ReleasrError::HistoricVersionError(
+                environment.name,
                 environment.last_deployed_version,
                 version,
             ));
