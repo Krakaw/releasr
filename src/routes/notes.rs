@@ -36,10 +36,15 @@ pub async fn new_note(
     let new_note = new_note.into_inner();
     let version = i64::from(new_note.version.clone());
     let name = new_note.environment.clone();
-    let environments = if name == "*" {
+    let environments = if name.contains("*") {
         // Apply it to all environments
-
-        Environment::find(crate::routes::environments::FindQuery { name: None }, &conn).await?
+        Environment::find(
+            crate::routes::environments::FindQuery {
+                name: Some(name.replace("*", "%")),
+            },
+            &conn,
+        )
+        .await?
     } else {
         // Check it's a valid environment
         let environment = Environment::get(name, &conn).await?;

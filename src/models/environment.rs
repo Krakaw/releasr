@@ -55,7 +55,7 @@ impl Environment {
         find_query: FindQuery,
         conn: &Connection,
     ) -> Result<Vec<Environment>, ReleasrError> {
-        let sql = "SELECT * FROM environments WHERE (?1 IS NULL OR name = ?1)";
+        let sql = "SELECT * FROM environments WHERE (?1 IS NULL OR name LIKE ?1)";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt
             .query_map(params![find_query.name], |row| Environment::try_from(row))?
