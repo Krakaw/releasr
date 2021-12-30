@@ -40,7 +40,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"version\": \"1.0.0\",\n    \"note\": \"First release note\",\n    \"environment_name\": \"dev\"\n}",
+					"raw": "{\n    \"version\": \"1.0.0\",\n    \"note\": \"First release note\",\n    \"environment\": \"dev\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -68,7 +68,35 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"version\": \"1.0.2\",\n    \"note\": \"Second version release note\",\n    \"environment_name\": \"dev\"\n}",
+					"raw": "{\n    \"version\": \"1.0.2\",\n    \"note\": \"Second version release note\",\n    \"environment\": \"dev\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/notes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Note 1.0.3 all envs",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"version\": \"1.0.3\",\n    \"note\": \"Third version release note for all envs\",\n    \"environment\": \"*\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"

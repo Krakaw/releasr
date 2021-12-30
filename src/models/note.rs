@@ -8,7 +8,7 @@ use crate::routes::notes::{CompleteQuery, FindQuery};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct NewNote {
     pub version: CustomVersion,
     pub note: String,

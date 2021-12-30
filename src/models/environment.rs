@@ -12,7 +12,7 @@ pub struct NewEnvironment {
     pub last_deployed_version: Option<i64>,
 }
 
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Deserialize, Debug, Serialize, Clone)]
 pub struct Environment {
     pub name: String,
     pub version_url: String,

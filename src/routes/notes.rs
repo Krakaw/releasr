@@ -36,16 +36,37 @@ pub async fn new_note(
     let new_note = new_note.into_inner();
     let version = i64::from(new_note.version.clone());
     let name = new_note.environment.clone();
-    // Check it's a valid environment
-    let environment = Environment::get(name, &conn).await?;
-    if environment.last_deployed_version > version {
-        return Err(ReleasrError::HistoricVersionError(
-            environment.last_deployed_version,
-            version,
-        ));
+    let environments = if name == "*" {
+        // Apply it to all environments
+
+        Environment::find(crate::routes::environments::FindQuery { name: None }, &conn).await?
+    } else {
+        // Check it's a valid environment
+        let environment = Environment::get(name, &conn).await?;
+        vec![environment]
+    };
+    // Check environment versions
+    for environment in environments.clone() {
+        if environment.last_deployed_version > version {
+            return Err(ReleasrError::HistoricVersionError(
+                environment.last_deployed_version,
+                version,
+            ));
+        }
     }
-    let note = new_note.save(&conn).await?;
-    Ok(HttpResponse::Ok().json(note))
+    // Now save the notes
+    let mut notes: Vec<Note> = vec![];
+    for environment in environments {
+        let note = NewNote {
+            environment: environment.name,
+            ..new_note.clone()
+        }
+        .save(&conn)
+        .await?;
+        notes.push(note);
+    }
+
+    Ok(HttpResponse::Ok().json(notes))
 }
 
 pub async fn delete_note(
