@@ -104,12 +104,6 @@ impl Note {
         )?;
         Ok(res)
     }
-
-    pub async fn complete(self, conn: &Connection) -> Result<Self, ReleasrError> {
-        let sql = "UPDATE notes SET completed_at = ?1 WHERE id = ?2;";
-        conn.execute(sql, &[&Utc::now().to_rfc3339(), &self.id.to_string()])?;
-        Note::get(self.id, conn).await
-    }
 }
 
 impl<'stmt> TryFrom<&Row<'stmt>> for Note {
