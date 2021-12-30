@@ -12,7 +12,7 @@ use std::convert::TryFrom;
 pub struct NewNote {
     pub version: CustomVersion,
     pub note: String,
-    pub environment_name: String,
+    pub environment: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -21,7 +21,7 @@ pub struct Note {
     version: CustomVersion,
     version_int: i64,
     note: String,
-    environment_name: String,
+    environment: String,
     completed_at: Option<DateTime<Utc>>,
     created_at: DateTime<Utc>,
     modified_at: DateTime<Utc>,
@@ -33,7 +33,7 @@ impl NewNote {
         let version_int: i64 = self.version.clone().into();
         let sql = r#"
             INSERT INTO notes
-                (version, version_int, note, environment_name, created_at, modified_at)
+                (version, version_int, note, environment, created_at, modified_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6);
            "#;
         conn.execute(
@@ -42,7 +42,7 @@ impl NewNote {
                 &self.version.to_string(),
                 &version_int.to_string(),
                 &self.note,
-                &self.environment_name,
+                &self.environment,
                 &now,
                 &now,
             ],
@@ -62,7 +62,7 @@ impl Note {
     }
 
     pub async fn find(find_query: FindQuery, conn: &Connection) -> Result<Vec<Note>, ReleasrError> {
-        let sql = "SELECT * FROM notes WHERE (?1 IS NULL OR environment_name = ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
+        let sql = "SELECT * FROM notes WHERE (?1 IS NULL OR environment = ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt
             .query_map(
@@ -91,7 +91,7 @@ impl Note {
         filter: CompleteQuery,
         conn: &Connection,
     ) -> Result<usize, ReleasrError> {
-        let sql = "UPDATE notes SET completed_at = ?1 WHERE environment_name = ?2 AND version_int <= ?3 AND completed_at IS NULL;";
+        let sql = "UPDATE notes SET completed_at = ?1 WHERE environment = ?2 AND version_int <= ?3 AND completed_at IS NULL;";
         let environment_name = filter.environment;
         let version_int = i64::from(filter.version);
         let res = conn.execute(
@@ -123,7 +123,7 @@ impl<'stmt> TryFrom<&Row<'stmt>> for Note {
             version: custom_version,
             version_int: row.get(2).unwrap(),
             note: row.get(3).unwrap(),
-            environment_name: row.get(4).unwrap(),
+            environment: row.get(4).unwrap(),
             completed_at: row.get(5).unwrap(),
             created_at: row.get(6).unwrap(),
             modified_at: row.get(7).unwrap(),

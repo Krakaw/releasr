@@ -35,7 +35,7 @@ pub async fn new_note(
     let conn = app_data.conn.lock().unwrap();
     let new_note = new_note.into_inner();
     let version = i64::from(new_note.version.clone());
-    let name = new_note.environment_name.clone();
+    let name = new_note.environment.clone();
     // Check it's a valid environment
     let environment = Environment::get(name, &conn).await?;
     if environment.last_deployed_version > version {
