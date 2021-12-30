@@ -10,7 +10,7 @@
 > Every release note is attached to an environment. 
 > Once a note has been completed it won't be shown again. 
 > 
-> Notes cannot be added to versions that have been completed.  
+> Notes cannot be added to a version that has been completed.  
 
 ## Install
 
