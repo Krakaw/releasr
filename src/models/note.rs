@@ -62,12 +62,12 @@ impl Note {
     }
 
     pub async fn find(find_query: FindQuery, conn: &Connection) -> Result<Vec<Note>, ReleasrError> {
-        let sql = "SELECT * FROM notes WHERE (?1 IS NULL OR environment = ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
+        let sql = "SELECT * FROM notes WHERE (?1 IS NULL OR environment LIKE ?1) AND (?2 IS NULL OR version_int <= ?2) AND (?3 = true OR completed_at IS NULL );";
         let mut stmt = conn.prepare(sql)?;
         let res = stmt
             .query_map(
                 params![
-                    find_query.environment,
+                    find_query.environment.map(|e| e.replace("*", "%")),
                     find_query.version.map(|v| {
                         let v: i64 = v.into();
                         v
@@ -91,14 +91,14 @@ impl Note {
         filter: CompleteQuery,
         conn: &Connection,
     ) -> Result<usize, ReleasrError> {
-        let sql = "UPDATE notes SET completed_at = ?1 WHERE environment = ?2 AND version_int <= ?3 AND completed_at IS NULL;";
+        let sql = "UPDATE notes SET completed_at = ?1 WHERE environment LIKE ?2 AND version_int <= ?3 AND completed_at IS NULL;";
         let environment_name = filter.environment;
         let version_int = i64::from(filter.version);
         let res = conn.execute(
             sql,
             params![
                 &Utc::now().to_rfc3339(),
-                &environment_name,
+                &environment_name.replace("*", "%"),
                 &version_int.to_string()
             ],
         )?;
