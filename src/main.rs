@@ -23,7 +23,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let db_path = config.clone().db_path;
-        let conn = get_connection(db_path).expect("Could not connect");
+        let conn = get_connection(db_path).expect("Could not connect to sqlite");
         let app_data = web::Data::new(AppData {
             conn: Mutex::new(conn),
             config: config.clone(),
