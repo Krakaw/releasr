@@ -8,7 +8,7 @@ description = "Release note tracking on a per environment per semver release."
 homepage = "https://github.com/Krakaw/releasr"
 repository = "https://github.com/Krakaw/releasr"
 readme = "README.md"
-keywords = ["release management", "release notes", "releases", "semver"]
+keywords = ["release-management", "release-notes", "releases", "semver"]
 categories = ["command-line-utilities", "web-programming::http-server", "development-tools"]
 
 [dependencies]
