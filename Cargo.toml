@@ -3,7 +3,13 @@ name = "releasr"
 version = "0.1.0"
 edition = "2018"
 authors = ["Krakaw <41575888+Krakaw@users.noreply.github.com>"]
-
+license = "MIT"
+description = "Release note tracking on a per environment per semver release."
+homepage = "https://github.com/Krakaw/releasr"
+repository = "https://github.com/Krakaw/releasr"
+readme = "README.md"
+keywords = ["release management", "release notes", "releases", "semver"]
+categories = ["command-line-utilities", "web-programming::http-server", "development-tools"]
 
 [dependencies]
 actix-web = "3"
